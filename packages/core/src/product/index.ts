@@ -73,6 +73,10 @@ export namespace Product {
         description: "Tags for the product.",
         example: Examples.Product.tags,
       }),
+      timeHidden: z.date().optional().openapi({
+        description: "Timestamp when the product was hidden from public view.",
+        example: undefined,
+      }),
     })
     .openapi({
       ref: "Product",
@@ -117,16 +121,16 @@ export namespace Product {
               !variant.tags || ProductFilter.run(filterContext, variant.tags),
           );
 
-          return {
-            id: group[0].product.id,
-            name: group[0].product.name,
-            description: group[0].product.description,
-            order: group[0].product.order || undefined,
-            subscription: group[0].product.subscription || undefined,
-            variants: filteredVariants,
-            tags: group[0].product.tags || undefined,
-          };
-        }),
+           return {
+             id: group[0].product.id,
+             name: group[0].product.name,
+             description: group[0].product.description,
+             order: group[0].product.order || undefined,
+             subscription: group[0].product.subscription || undefined,
+             variants: filteredVariants,
+             tags: group[0].product.tags || undefined,
+             timeHidden: group[0].product.timeHidden || undefined,
+           };        }),
       ).filter(
         (item) =>
           // Only include products that pass the filter and have at least one variant
@@ -171,49 +175,50 @@ export namespace Product {
               !variant.tags || ProductFilter.run(filterContext, variant.tags),
           );
 
-          return {
-            id: group[0].product.id,
-            name: group[0].product.name,
-            description: group[0].product.description,
-            variants: filteredVariants,
-            tags: group[0].product.tags || undefined,
-            order: group[0].product.order || undefined,
-            subscription: group[0].product.subscription || undefined,
-          };
-        }),
+           return {
+             id: group[0].product.id,
+             name: group[0].product.name,
+             description: group[0].product.description,
+             variants: filteredVariants,
+             tags: group[0].product.tags || undefined,
+             order: group[0].product.order || undefined,
+             subscription: group[0].product.subscription || undefined,
+             timeHidden: group[0].product.timeHidden || undefined,
+           };        }),
         first(),
       );
       return result;
     }),
   );
 
-  export const edit = fn(
-    Info.pick({
-      name: true,
-      description: true,
-      id: true,
-      order: true,
-      subscription: true,
-      tags: true,
-    }).partial({
-      name: true,
-      description: true,
-      order: true,
-      tags: true,
-    }),
-    (input) =>
+   export const edit = fn(
+     Info.pick({
+       name: true,
+       description: true,
+       id: true,
+       order: true,
+       subscription: true,
+       tags: true,
+       timeHidden: true,
+     }).partial({
+       name: true,
+       description: true,
+       order: true,
+       tags: true,
+       timeHidden: true,
+     }),    (input) =>
       useTransaction(async (tx) => {
-        await tx
-          .update(productTable)
-          .set({
-            name: input.name,
-            description: input.description,
-            order: input.order,
-            subscription: input.subscription || null,
-            tags: input.tags || null,
-          })
-          .where(eq(productTable.id, input.id));
-      }),
+         await tx
+           .update(productTable)
+           .set({
+             name: input.name,
+             description: input.description,
+             order: input.order,
+             subscription: input.subscription || null,
+             tags: input.tags || null,
+             timeHidden: input.timeHidden || null,
+           })
+           .where(eq(productTable.id, input.id));      }),
   );
 
   export const create = fn(

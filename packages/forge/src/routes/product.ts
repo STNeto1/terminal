@@ -113,15 +113,18 @@ export default new Page({
                   label: "Name",
                   value: product.name,
                 },
-                {
-                  label: "Description",
-                  value: product.description,
-                },
-                ...Object.entries(product.tags || {}).map(([key, value]) => ({
-                  label: key,
-                  value,
-                })),
-              ],
+                 {
+                   label: "Description",
+                   value: product.description,
+                 },
+                 {
+                   label: "Time Hidden",
+                   value: product.timeHidden ? product.timeHidden.toISOString() : "Not hidden",
+                 },
+                 ...Object.entries(product.tags || {}).map(([key, value]) => ({
+                   label: key,
+                   value,
+                 })),              ],
             }),
             io.display.link("Add Variant", {
               route: "product/variant/create",
@@ -166,23 +169,25 @@ export default new Page({
       unlisted: true,
       async handler() {
         const product = await selectProduct();
-        const { name, description, order, subscription, ...tags } =
-          await io.group({
-            name: io.input.text("name", {
-              defaultValue: product.name,
-            }),
-            description: io.input.text("description", {
-              defaultValue: product.description,
-              multiline: true,
-            }),
-            order: io.input.number("order", {
-              defaultValue: product.order,
-            }),
-            subscription: io.select.single("subscription", {
-              options: ["none", "allowed", "required"],
-              defaultValue: product.subscription || "none",
-            }),
-            ...Object.fromEntries(
+         const { name, description, order, subscription, timeHidden, ...tags } =
+           await io.group({
+             name: io.input.text("name", {
+               defaultValue: product.name,
+             }),
+             description: io.input.text("description", {
+               defaultValue: product.description,
+               multiline: true,
+             }),
+             order: io.input.number("order", {
+               defaultValue: product.order,
+             }),
+             subscription: io.select.single("subscription", {
+               options: ["none", "allowed", "required"],
+               defaultValue: product.subscription || "none",
+             }),
+             timeHidden: io.input.datetime("time hidden", {
+               defaultValue: product.timeHidden,
+             }).optional(),            ...Object.fromEntries(
               Object.entries(ProductTags.shape).map(([key, value]) => [
                 key,
                 value._def.innerType instanceof z.ZodBoolean
@@ -204,19 +209,19 @@ export default new Page({
             ),
           });
         console.log(tags);
-        await Product.edit({
-          id: product.id,
-          name,
-          description,
-          order,
-          subscription:
-            subscription === "none" ? undefined : (subscription as any),
-          tags: {
-            ...product.tags,
-            ...tags,
-          },
-        });
-        await ctx.redirect({
+         await Product.edit({
+           id: product.id,
+           name,
+           description,
+           order,
+           subscription:
+             subscription === "none" ? undefined : (subscription as any),
+           tags: {
+             ...product.tags,
+             ...tags,
+           },
+           timeHidden,
+         });        await ctx.redirect({
           route: "product/detail",
           params: { productID: product.id },
         });

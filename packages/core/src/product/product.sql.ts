@@ -6,7 +6,7 @@ import {
   primaryKey,
   json,
 } from "drizzle-orm/mysql-core";
-import { dollar, id, ulid, timestamps } from "../drizzle/types";
+import { dollar, id, ulid, timestamps, timestamp } from "../drizzle/types";
 import { inventoryTable } from "../inventory/inventory.sql";
 import { z } from "zod";
 
@@ -35,6 +35,7 @@ export const productTable = mysqlTable("product", {
     length: 255,
   }).$type<ProductSubscriptionSetting>(),
   tags: json("tags").$type<ProductTags>(),
+  timeHidden: timestamp("time_hidden"),
 });
 
 export const ProductVariantTags = z.object({
