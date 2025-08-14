@@ -40,5 +40,6 @@ new sst.aws.Cron("StripeAnalytics", {
     ],
     timeout: "5 minutes",
     handler: "./packages/functions/src/cron/stripe.handler",
+    memory: "2048 MB",
   },
 });
